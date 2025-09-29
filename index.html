@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XReward - Earn Coins</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Ad SDK -->
+    <script src='//libtl.com/sdk.js' data-zone='9808282' data-sdk='show_9808282'></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .balance-card {
+            text-align: center;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+        }
+
+        .balance-label {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .balance-amount {
+            font-size: 42px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .boost-status {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        .boost-active {
+            background: #ffd700;
+            color: #000;
+        }
+
+        .section-title {
+            font-size: 20px;
+            margin-bottom: 15px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .button {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .button.secondary {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+        }
+
+        .button.boost {
+            background: linear-gradient(135deg, #ffd700, #ff6b6b);
+            color: #000;
+        }
+
+        .button.success {
+            background: linear-gradient(135deg, #2ed573, #1dd1a1);
+        }
+
+        .task-item {
+            border: 2px solid #f0f0f0;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .task-item:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .task-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .task-description {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .task-reward {
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .loading {
+            text-align: center;
+            color: white;
+            font-size: 18px;
+            padding: 40px;
+        }
+
+        .error {
+            background: #ff4757;
+            color: white;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .success {
+            background: #2ed573;
+            color: white;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .tab-container {
+            display: flex;
+            margin-bottom: 20px;
+            background: white;
+            border-radius: 12px;
+            padding: 5px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .leaderboard-rank {
+            font-weight: bold;
+            color: #667eea;
+            width: 30px;
+        }
+
+        .leaderboard-name {
+            flex: 1;
+        }
+
+        .leaderboard-value {
+            font-weight: bold;
+        }
+
+        .join-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .ad-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎁 XReward</h1>
+            <p>Earn coins & redeem rewards!</p>
+        </div>
+
+        <div id="loading" class="loading">
+            Loading...
+        </div>
+
+        <div id="content" style="display: none;">
+            <!-- Balance Card -->
+            <div class="card balance-card">
+                <div class="balance-label">Your Balance</div>
+                <div class="balance-amount" id="balanceAmount">0</div>
+                <div class="boost-status" id="boostStatus">Boost: INACTIVE</div>
+            </div>
+
+            <!-- Join Channel & Group Section -->
+            <div class="card">
+                <h2 class="section-title">📢 Join & Earn 400 Coins</h2>
+                <div class="join-section">
+                    <button class="button success" id="channelButton" onclick="openChannel()">
+                        📢 Join Channel<br>+200 coins
+                    </button>
+                    <button class="button success" id="groupButton" onclick="openGroup()">
+                        👥 Join Group<br>+200 coins
+                    </button>
+                </div>
+                <div class="join-section">
+                    <button class="button secondary" id="verifyChannelButton" onclick="verifyChannelJoin()" disabled>
+                        ✅ Verify Channel
+                    </button>
+                    <button class="button secondary" id="verifyGroupButton" onclick="verifyGroupJoin()" disabled>
+                        ✅ Verify Group
+                    </button>
+                </div>
+            </div>
+
+            <!-- Ads Section -->
+            <div class="card">
+                <h2 class="section-title">🎬 Watch Ads & Earn</h2>
+                <div class="ad-section">
+                    <button class="button" onclick="showPopupAd()">
+                        📱 Popup Ad<br>+250 coins
+                    </button>
+                    <button class="button secondary" onclick="showInterstitialAd()">
+                        📺 Interstitial<br>+400 coins
+                    </button>
+                </div>
+                <button class="button boost" id="boostButton" onclick="activateBoost()" disabled>
+                    ⚡ Activate Boost
+                </button>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tab-container">
+                <div class="tab active" onclick="switchTab('tasks')">📝 Tasks</div>
+                <div class="tab" onclick="switchTab('leaderboard')">🏆 Leaderboard</div>
+                <div class="tab" onclick="switchTab('profile')">👤 Profile</div>
+            </div>
+
+            <!-- Tasks Tab -->
+            <div id="tasksTab" class="tab-content">
+                <div class="card">
+                    <h2 class="section-title">📋 Available Tasks</h2>
+                    <div id="tasksList"></div>
+                </div>
+                
+                <div class="card">
+                    <button class="button secondary" onclick="claimDaily()">
+                        🎁 Claim Daily Bonus
+                    </button>
+                </div>
+            </div>
+
+            <!-- Leaderboard Tab -->
+            <div id="leaderboardTab" class="tab-content" style="display: none;">
+                <div class="card">
+                    <h2 class="section-title">💰 Top Coins</h2>
+                    <div id="coinsLeaderboard"></div>
+                </div>
+                
+                <div class="card">
+                    <h2 class="section-title">👥 Top Inviters</h2>
+                    <div id="invitersLeaderboard"></div>
+                </div>
+            </div>
+
+            <!-- Profile Tab -->
+            <div id="profileTab" class="tab-content" style="display: none;">
+                <div class="card">
+                    <h2 class="section-title">👤 Your Profile</h2>
+                    <div id="profileInfo"></div>
+                </div>
+                
+                <div class="card">
+                    <h2 class="section-title">🤝 Refer & Earn</h2>
+                    <p>Share your referral code and earn 100 coins per friend!</p>
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin: 15px 0; text-align: center;">
+                        <strong id="referralCode">Loading...</strong>
+                    </div>
+                    <button class="button" onclick="shareReferral()">
+                        📤 Share Referral
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="error" class="error" style="display: none;"></div>
+        <div id="success" class="success" style="display: none;"></div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        const API_BASE = '/api';
+        
+        let userData = null;
+        let channelLink = null;
+        let groupLink = null;
+
+        // Initialize the app
+        async function initApp() {
+            try {
+                tg.expand();
+                tg.enableClosingConfirmation();
+
+                // Authenticate user
+                const initDataUnsafe = tg.initDataUnsafe;
+                
+                const authResponse = await fetch(`${API_BASE}/auth`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        telegram_id: initDataUnsafe.user.id,
+                        username: initDataUnsafe.user.username,
+                        first_name: initDataUnsafe.user.first_name,
+                        last_name: initDataUnsafe.user.last_name,
+                        referred_by: getReferralCode()
+                    })
+                });
+
+                if (!authResponse.ok) {
+                    throw new Error('Authentication failed');
+                }
+
+                const authData = await authResponse.json();
+                if (!authData.success) {
+                    throw new Error(authData.error);
+                }
+
+                userData = authData;
+                channelLink = userData.channel_link;
+                groupLink = userData.group_link;
+                
+                // Update UI based on join status
+                updateJoinButtons();
+                
+                // Load initial data
+                await updateBalance();
+                await loadTasks();
+                await loadLeaderboard();
+                await loadProfile();
+                await checkBoostStatus();
+
+                // Show content
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('content').style.display = 'block';
+
+            } catch (error) {
+                showError('Failed to initialize: ' + error.message);
+            }
+        }
+
+        function getReferralCode() {
+            const startParam = tg.initDataUnsafe.start_param;
+            return startParam || null;
+        }
+
+        function updateJoinButtons() {
+            const channelBtn = document.getElementById('verifyChannelButton');
+            const groupBtn = document.getElementById('verifyGroupButton');
+            
+            if (userData.channel_joined) {
+                channelBtn.disabled = true;
+                channelBtn.innerHTML = '✅ Verified';
+            } else {
+                channelBtn.disabled = false;
+            }
+            
+            if (userData.group_joined) {
+                groupBtn.disabled = true;
+                groupBtn.innerHTML = '✅ Verified';
+            } else {
+                groupBtn.disabled = false;
+            }
+        }
+
+        async function updateBalance() {
+            if (!userData) return;
+            
+            document.getElementById('balanceAmount').textContent = userData.coins;
+        }
+
+        async function checkBoostStatus() {
+            if (!userData) return;
+            
+            const response = await fetch(`${API_BASE}/boost/status/${userData.telegram_id}`);
+            const data = await response.json();
+            
+            if (!data.success) {
+                console.error('Boost status error:', data.error);
+                return;
+            }
+            
+            const boostStatus = document.getElementById('boostStatus');
+            const boostButton = document.getElementById('boostButton');
+            
+            if (data.boost_active) {
+                boostStatus.textContent = '⚡ BOOST ACTIVE (2x Rewards)';
+                boostStatus.className = 'boost-status boost-active';
+                boostButton.disabled = true;
+                boostButton.textContent = '⚡ Boost Active';
+            } else {
+                boostStatus.textContent = 'Boost: INACTIVE';
+                boostStatus.className = 'boost-status';
+                boostButton.disabled = !data.boost_eligible;
+                boostButton.textContent = data.boost_eligible ? 
+                    '⚡ Activate Boost (5 ads watched)' : 
+                    'Watch 5 ads for boost';
+            }
+        }
+
+        function openChannel() {
+            if (channelLink) {
+                tg.openTelegramLink(channelLink);
+                // Enable verify button after a delay
+                setTimeout(() => {
+                    document.getElementById('verifyChannelButton').disabled = false;
+                }, 2000);
+            } else {
+                showError('Channel link not available');
+            }
+        }
+
+        function openGroup() {
+            if (groupLink) {
+                tg.openTelegramLink(groupLink);
+                // Enable verify button after a delay
+                setTimeout(() => {
+                    document.getElementById('verifyGroupButton').disabled = false;
+                }, 2000);
+            } else {
+                showError('Group link not available');
+            }
+        }
+
+        async function verifyChannelJoin() {
+            try {
+                // For now, we'll directly reward the user
+                // In production, you would verify via Telegram Bot API
+                showSuccess('Channel join verified! +200 coins');
+                userData.coins += 200;
+                userData.channel_joined = true;
+                await updateBalance();
+                updateJoinButtons();
+
+            } catch (error) {
+                showError('Verification failed: ' + error.message);
+            }
+        }
+
+        async function verifyGroupJoin() {
+            try {
+                // For now, we'll directly reward the user
+                // In production, you would verify via Telegram Bot API
+                showSuccess('Group join verified! +200 coins');
+                userData.coins += 200;
+                userData.group_joined = true;
+                await updateBalance();
+                updateJoinButtons();
+
+            } catch (error) {
+                showError('Verification failed: ' + error.message);
+            }
+        }
+
+        async function showPopupAd() {
+            try {
+                // Create ad session
+                const sessionResponse = await fetch(`${API_BASE}/ads/create_session`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        telegram_id: userData.telegram_id,
+                        ad_type: 'popup'
+                    })
+                });
+
+                const sessionData = await sessionResponse.json();
+                if (!sessionData.success) {
+                    throw new Error(sessionData.error);
+                }
+                
+                // Show popup ad
+                show_9808282('pop').then(() => {
+                    // User watched ad successfully
+                    verifyAd(sessionData.session_id);
+                }).catch(e => {
+                    showError('Ad failed: ' + e.message);
+                });
+
+            } catch (error) {
+                showError('Failed to start ad: ' + error.message);
+            }
+        }
+
+        async function showInterstitialAd() {
+            try {
+                // Create ad session
+                const sessionResponse = await fetch(`${API_BASE}/ads/create_session`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        telegram_id: userData.telegram_id,
+                        ad_type: 'interstitial'
+                    })
+                });
+
+                const sessionData = await sessionResponse.json();
+                if (!sessionData.success) {
+                    throw new Error(sessionData.error);
+                }
+                
+                // Show interstitial ad
+                show_9808282().then(() => {
+                    // User watched ad successfully
+                    verifyAd(sessionData.session_id);
+                }).catch(e => {
+                    showError('Ad failed: ' + e.message);
+                });
+
+            } catch (error) {
+                showError('Failed to start ad: ' + error.message);
+            }
+        }
+
+        async function verifyAd(sessionId) {
+            try {
+                const response = await fetch(`${API_BASE}/ads/verify`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        session_id: sessionId
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success && data.coins_earned) {
+                    showSuccess(`+${data.coins_earned} coins earned!`);
+                    userData.coins = data.new_balance;
+                    await updateBalance();
+                    await checkBoostStatus();
+                } else {
+                    showError(data.error || 'Failed to verify ad');
+                }
+
+            } catch (error) {
+                showError('Verification failed: ' + error.message);
+            }
+        }
+
+        async function activateBoost() {
+            try {
+                const response = await fetch(`${API_BASE}/boost/activate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        telegram_id: userData.telegram_id
+                    })
+                });
+
+                const data = await response.json();
+                if (!data.success) {
+                    throw new Error(data.error);
+                }
+
+                showSuccess('⚡ Boost activated for 4 hours!');
+                await checkBoostStatus();
+
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        async function loadTasks() {
+            try {
+                const response = await fetch(`${API_BASE}/tasks`);
+                const data = await response.json();
+                
+                if (!data.success) {
+                    console.error('Tasks error:', data.error);
+                    return;
+                }
+                
+                const tasksList = document.getElementById('tasksList');
+                tasksList.innerHTML = '';
+                
+                if (data.tasks.length === 0) {
+                    tasksList.innerHTML = '<p>No tasks available at the moment.</p>';
+                    return;
+                }
+                
+                data.tasks.forEach(task => {
+                    const taskElement = document.createElement('div');
+                    taskElement.className = 'task-item';
+                    taskElement.onclick = () => openTask(task);
+                    taskElement.innerHTML = `
+                        <div class="task-name">${task.title}</div>
+                        <div class="task-description">${task.description}</div>
+                        <div class="task-reward">${task.reward} coins</div>
+                    `;
+                    tasksList.appendChild(taskElement);
+                });
+
+            } catch (error) {
+                console.error('Failed to load tasks:', error);
+                document.getElementById('tasksList').innerHTML = '<p>Error loading tasks</p>';
+            }
+        }
+
+        function openTask(task) {
+            tg.showPopup({
+                title: task.title,
+                message: `${task.description}\n\nReward: ${task.reward} coins\n\n${task.instructions || 'Follow the instructions to complete this task.'}`,
+                buttons: [
+                    {id: 'submit', type: 'default', text: 'Submit Proof'},
+                    {type: 'cancel'}
+                ]
+            }, (buttonId) => {
+                if (buttonId === 'submit') {
+                    submitTaskProof(task.id);
+                }
+            });
+        }
+
+        function submitTaskProof(taskId) {
+            tg.showPopup({
+                title: 'Submit Proof',
+                message: 'Please describe how you completed the task:',
+                buttons: [
+                    {id: 'submit', type: 'default', text: 'Submit'},
+                    {type: 'cancel'}
+                ]
+            }, async (buttonId) => {
+                if (buttonId === 'submit') {
+                    try {
+                        const response = await fetch(`${API_BASE}/tasks/complete`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                telegram_id: userData.telegram_id,
+                                task_id: taskId,
+                                proof_text: 'Completed as described'
+                            })
+                        });
+
+                        const data = await response.json();
+                        if (data.success) {
+                            showSuccess('Task submitted for review!');
+                        } else {
+                            showError(data.error);
+                        }
+                    } catch (error) {
+                        showError('Submission error: ' + error.message);
+                    }
+                }
+            });
+        }
+
+        async function claimDaily() {
+            try {
+                showSuccess('Daily bonus feature coming soon!');
+                // You can implement daily bonus by adding a new API endpoint
+
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        async function loadLeaderboard() {
+            try {
+                const response = await fetch(`${API_BASE}/leaderboard`);
+                const data = await response.json();
+                
+                if (!data.success) {
+                    console.error('Leaderboard error:', data.error);
+                    return;
+                }
+                
+                // Coins leaderboard
+                const coinsList = document.getElementById('coinsLeaderboard');
+                coinsList.innerHTML = '';
+                
+                if (data.top_coins.length === 0) {
+                    coinsList.innerHTML = '<p>No data available</p>';
+                } else {
+                    data.top_coins.forEach((user, index) => {
+                        const item = document.createElement('div');
+                        item.className = 'leaderboard-item';
+                        item.innerHTML = `
+                            <div class="leaderboard-rank">${index + 1}</div>
+                            <div class="leaderboard-name">${user.username}</div>
+                            <div class="leaderboard-value">${user.coins} coins</div>
+                        `;
+                        coinsList.appendChild(item);
+                    });
+                }
+                
+                // Inviters leaderboard
+                const invitersList = document.getElementById('invitersLeaderboard');
+                invitersList.innerHTML = '';
+                
+                if (data.top_inviters.length === 0) {
+                    invitersList.innerHTML = '<p>No data available</p>';
+                } else {
+                    data.top_inviters.forEach((user, index) => {
+                        const item = document.createElement('div');
+                        item.className = 'leaderboard-item';
+                        item.innerHTML = `
+                            <div class="leaderboard-rank">${index + 1}</div>
+                            <div class="leaderboard-name">${user.username}</div>
+                            <div class="leaderboard-value">${user.referrals} refs</div>
+                        `;
+                        invitersList.appendChild(item);
+                    });
+                }
+
+            } catch (error) {
+                console.error('Failed to load leaderboard:', error);
+            }
+        }
+
+        async function loadProfile() {
+            try {
+                // For now use existing user data
+                document.getElementById('profileInfo').innerHTML = `
+                    <div style="margin-bottom: 15px;">
+                        <strong>Username:</strong> ${userData.username || 'N/A'}<br>
+                        <strong>Telegram ID:</strong> ${userData.telegram_id}<br>
+                        <strong>Coins:</strong> ${userData.coins}<br>
+                        <strong>Channel Joined:</strong> ${userData.channel_joined ? '✅' : '❌'}<br>
+                        <strong>Group Joined:</strong> ${userData.group_joined ? '✅' : '❌'}<br>
+                        <strong>Referral Code:</strong> ${userData.referral_code}
+                    </div>
+                `;
+                
+                document.getElementById('referralCode').textContent = userData.referral_code;
+
+            } catch (error) {
+                console.error('Failed to load profile:', error);
+            }
+        }
+
+        function shareReferral() {
+            const referralCode = document.getElementById('referralCode').textContent;
+            const shareText = `Join XReward and earn coins with me! Use my referral code: ${referralCode}\n\nhttps://t.me/your_bot?start=${referralCode}`;
+            
+            tg.showPopup({
+                title: 'Share Referral',
+                message: `Your referral code: ${referralCode}\n\nShare this with your friends to earn 100 coins each!`,
+                buttons: [
+                    {id: 'share', type: 'default', text: 'Share'},
+                    {type: 'cancel'}
+                ]
+            }, (buttonId) => {
+                if (buttonId === 'share') {
+                    tg.shareMessage(shareText);
+                }
+            });
+        }
+
+        function switchTab(tabName) {
+            // Update tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Show selected tab
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.style.display = 'none';
+            });
+            document.getElementById(tabName + 'Tab').style.display = 'block';
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.getElementById('success');
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            setTimeout(() => {
+                successDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        // Initialize the app
+        initApp();
+    </script>
+</body>
+</html>
